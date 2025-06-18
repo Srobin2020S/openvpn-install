@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022-2023 Lin Song <linsongui@gmail.com>
+# Copyright (C) 2022-2024 Lin Song <linsongui@gmail.com>
 
 name: test_set_1
 
@@ -7,16 +7,16 @@ on: workflow_call
 
 jobs:
   test_set_1:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: github.repository_owner == 'hwdsl2'
     strategy:
       matrix:
-        os_version: ["centos:9s", "centos:8s", "centos:7", "rockylinux:8", "almalinux:9", "almalinux:8", "amazonlinux:2"]
+        os_version: ["centos:9s", "rockylinux:8", "almalinux:9", "almalinux:8", "amazonlinux:2"]
       fail-fast: false
     env:
       OS_VERSION: ${{ matrix.os_version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - name: Build
@@ -101,6 +101,7 @@ jobs:
 
 
 
+
           ANSWERS
 
           netstat -anpu | grep openvpn
@@ -114,6 +115,25 @@ jobs:
 
           netstat -anpu | grep openvpn && exit 1
           rm -f ~/client*.ovpn
+
+          bash openvpn.sh <<ANSWERS
+          y
+          invalidfqdn
+          vpn.example.com
+
+
+
+
+
+          ANSWERS
+
+          grep -q 'remote vpn.example.com 1194' /etc/openvpn/server/client-common.txt
+          grep -q 'remote vpn.example.com 1194' ~/client.ovpn
+
+          bash openvpn.sh <<ANSWERS
+          5
+          y
+          ANSWERS
 
           exit 0
           EOF
